@@ -79,7 +79,7 @@ struct BackupsSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Sicherungen").font(.headline)
-            Text("Einmal am Tag sichert die App alle Journale als ZIP-Datei auf diesem Mac (die letzten 30). Zum Zurückholen: im Finder die ZIP-Datei öffnen und den Eintrag herauskopieren.")
+            Text("Einmal am Tag sichert die App alle Journale als ZIP-Datei auf diesem Mac (die letzten 30). Zum Zurückholen: bei der Sicherung auf „Wiederherstellen …“ klicken.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

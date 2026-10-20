@@ -22,7 +22,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.2"
-    CURRENT_PROJECT_VERSION: 30
+    CURRENT_PROJECT_VERSION: 31
     CODE_SIGN_STYLE: Automatic
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon   # Quelle: Tools/make-icons.swift, Tools/make-ios-icon.swift
 
@@ -122,6 +122,8 @@ targets:
         # Vorlesen läuft weiter, wenn der Bildschirm ausgeht.
         UIBackgroundModes: [audio]
         NSFaceIDUsageDescription: "Face ID öffnet gesperrte Journale."
+        NSMicrophoneUsageDescription: "Diktieren: Du sprichst, die App schreibt mit."
+        NSSpeechRecognitionUsageDescription: "Diktieren: Gesprochenes wird zu Text, wenn möglich direkt auf dem iPhone."
         NSLocationWhenInUseUsageDescription: "Der Ort wird nur gespeichert, wenn du im Eintrag „Aktueller Ort“ wählst."
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

@@ -32,6 +32,10 @@
 	<string>Face ID öffnet gesperrte Journale.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Der Ort wird nur gespeichert, wenn du im Eintrag „Aktueller Ort“ wählst.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Diktieren: Du sprichst, die App schreibt mit.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Diktieren: Gesprochenes wird zu Text, wenn möglich direkt auf dem iPhone.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
 		<key>iCloud.eu.gutzmannit.journalit</key>

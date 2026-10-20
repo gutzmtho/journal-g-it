@@ -26,6 +26,9 @@ struct PhoneEntryView: View {
     @State private var findShown = false
     @State private var tagsShown = false
     @ObservedObject private var speaker = Speaker.shared
+    @ObservedObject private var dictation = PhoneDictation.shared
+    /// Markdown-Text beim Start des Diktats; das Gesagte kommt hinten dran.
+    @State private var dictationBase = ""
     @AppStorage("fontSize") private var fontSize = 17.0
 
     private var isRich: Bool { Library.isRich(url) }
@@ -46,6 +49,8 @@ struct PhoneEntryView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
+            // Beim Diktieren: erkannter Text und Stopp.
+            if dictation.target == url { DictationBar() }
             // Beim Vorlesen: Absatz zurück, Pause/Weiter, Absatz vor, Stopp.
             if speaker.speaking == url {
                 HStack { SpeechControls(url: url, library: library) }
@@ -77,6 +82,17 @@ struct PhoneEntryView: View {
         .navigationTitle(library.entries.first { $0.url == url }?.title ?? url.deletingPathExtension().lastPathComponent)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    if !editing { editing = true }
+                    if speaker.speaking != nil { speaker.stop() }  // Vorlesen und Zuhören zugleich geht nicht
+                    dictationBase = markdown
+                    dictation.toggle(for: url)
+                } label: {
+                    Label("Diktieren", systemImage: dictation.target == url ? "mic.fill" : "mic")
+                }
+                .tint(dictation.target == url ? .red : nil)
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button(editing ? "Fertig" : "Bearbeiten") {
                     if editing { saveMarkdownNow() }
@@ -146,10 +162,31 @@ struct PhoneEntryView: View {
             }
         }
         .onChange(of: markdown) { _, _ in scheduleMarkdownSave() }
+        .onChange(of: dictation.transcript) { _, text in
+            guard dictation.target == url else { return }
+            if isRich {
+                NotificationCenter.default.post(name: .phoneDictationText, object: url, userInfo: ["text": text])
+            } else {
+                let gap = dictationBase.isEmpty || dictationBase.hasSuffix("\n") || dictationBase.hasSuffix(" ") ? "" : " "
+                markdown = dictationBase + gap + text
+            }
+        }
+        .onChange(of: dictation.target) { old, new in
+            guard old == url, new != url else { return }
+            if isRich {
+                NotificationCenter.default.post(name: .phoneDictationText, object: url, userInfo: ["done": true])
+            } else {
+                saveMarkdownNow()
+            }
+        }
+        .alert("Diktieren", isPresented: Binding(get: { dictation.problem != nil }, set: { if !$0 { dictation.problem = nil } })) {
+            Button("OK") { dictation.problem = nil }
+        } message: { Text(dictation.problem ?? "") }
         .onChange(of: library.externalRevision) { _, _ in
             if !isRich && markdown == savedMarkdown { loadMarkdown() }
         }
         .onDisappear {
+            if dictation.target == url { dictation.stop() }
             saveMarkdownNow()
             if speaker.speaking == url { speaker.stop() }
         }
@@ -228,6 +265,8 @@ struct PhoneRichTextView: UIViewRepresentable {
         context.coordinator.observeSpeech()
         NotificationCenter.default.addObserver(context.coordinator, selector: #selector(Coordinator.find(_:)),
                                                name: .phoneFindInEntry, object: nil)
+        NotificationCenter.default.addObserver(context.coordinator, selector: #selector(Coordinator.dictated(_:)),
+                                               name: .phoneDictationText, object: nil)
         return textView
     }
 
@@ -261,6 +300,36 @@ struct PhoneRichTextView: UIViewRepresentable {
         init(_ parent: PhoneRichTextView) {
             self.parent = parent
             self.revision = parent.revision
+        }
+
+        /// Wo der diktierte Text steht (wird bei jedem neuen Stück ersetzt); nil = kein Diktat.
+        private var dictationRange: NSRange?
+
+        /// Diktierten Text an der Cursor-Stelle einsetzen und laufend aktualisieren.
+        @objc func dictated(_ note: Notification) {
+            guard note.object as? URL == parent.url, let textView, let storage = textView.textStorage as NSTextStorage? else { return }
+            if note.userInfo?["done"] as? Bool == true {
+                dictationRange = nil
+                return
+            }
+            guard let text = note.userInfo?["text"] as? String, !text.isEmpty else { return }
+            if dictationRange == nil {
+                var start = textView.isFirstResponder ? textView.selectedRange : NSRange(location: storage.length, length: 0)
+                start.location = min(start.location, storage.length)
+                start.length = min(start.length, storage.length - start.location)
+                dictationRange = start
+            }
+            guard var range = dictationRange, NSMaxRange(range) <= storage.length else { dictationRange = nil; return }
+            // Leerzeichen davor, wenn direkt an ein Wort angeschlossen würde.
+            let before = range.location > 0 ? (storage.string as NSString).substring(with: NSRange(location: range.location - 1, length: 1)) : "\n"
+            let gap = before == " " || before == "\n" || before == "\t" ? "" : " "
+            let inserted = NSAttributedString(string: gap + text, attributes: textView.typingAttributes)
+            storage.replaceCharacters(in: range, with: inserted)
+            range.length = inserted.length
+            dictationRange = range
+            textView.selectedRange = NSRange(location: NSMaxRange(range), length: 0)
+            textView.scrollRangeToVisible(textView.selectedRange)
+            textViewDidChange(textView)
         }
 
         @objc func find(_ note: Notification) {
