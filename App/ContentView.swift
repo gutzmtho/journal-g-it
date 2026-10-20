@@ -166,7 +166,7 @@ struct ContentView: View {
                     Button { library.unlocked ? library.lockNow() : library.unlock() } label: {
                         Label(library.unlocked ? "Sperren" : "Entsperren", systemImage: library.unlocked ? "lock.open" : "lock.fill")
                     }
-                    .help(library.unlocked ? "Gesperrte Journale wieder sperren (⌃⌘L)" : "Gesperrte Journale zeigen (Touch ID oder Mac-Passwort)")
+                    .help(library.unlocked ? "Gesperrte Journale wieder sperren (⌃⌘L)" : "Gesperrte Journale zeigen (Passwort oder Touch ID)")
                 }
             }
             if let selection {

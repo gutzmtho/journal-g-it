@@ -27,7 +27,7 @@ iCloud folder.
 - **Exchange:** print and PDF, export as text or HTML, "Copy as HTML", import files (Markdown, text, RTF, Word, HTML,
   OpenDocument) and calendar events, create an event or reminder from an entry.
 - **Security:** lock journals; **encrypt** journals or single entries (see below); earlier versions of every entry;
-  daily backup of all journals as ZIP.
+  daily backup of all journals as ZIP, with restoring single entries.
 - **Migration:** tools in `Tools/` to move a MacJournal library into folders of RTF/RTFD files (titles, dates, images and
   links between entries are kept).
 

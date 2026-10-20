@@ -27,7 +27,7 @@ den iCloud-Ordner der App.
 - **Austausch:** Drucken und PDF, Export als Text oder HTML, „Als HTML kopieren“, Import von Dateien (Markdown, Text, RTF,
   Word, HTML, OpenDocument) und von Kalender-Terminen, Termin oder Erinnerung aus einem Eintrag.
 - **Sicherheit:** Journale sperren; Journale oder einzelne Einträge **verschlüsseln** (siehe unten); frühere Versionen
-  jedes Eintrags; tägliche Sicherung aller Journale als ZIP.
+  jedes Eintrags; tägliche Sicherung aller Journale als ZIP, mit Wiederherstellen einzelner Einträge.
 - **Mitnehmen:** Werkzeuge in `Tools/`, um eine MacJournal-Bibliothek in Ordner mit RTF/RTFD-Dateien zu übertragen
   (Titel, Datum, Bilder, Links zwischen Einträgen bleiben).
 

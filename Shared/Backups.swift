@@ -134,4 +134,82 @@ extension Library {
             DispatchQueue.main.async { done?(result) }
         }
     }
+
+    // MARK: Wiederherstellen
+
+    /// Ein Eintrag in einer Sicherung und wie er zum jetzigen Stand steht.
+    struct BackupItem: Identifiable, Hashable {
+        enum State: String { case missing = "fehlt", changed = "geändert", same = "gleich" }
+        let source: URL      // im ausgepackten Zwischenordner
+        let relative: String // Pfad ab dem iCloud-Ordner der App, z. B. „Journal/2026/10/20/2026-10-20.md“
+        let state: State
+        var id: String { relative }
+    }
+
+    #if os(macOS)
+    /// Sicherung in einen Zwischenordner auspacken und mit dem jetzigen Stand vergleichen.
+    func openBackup(_ backup: BackupFile) throws -> (folder: URL, items: [BackupItem]) {
+        let temp = FileManager.default.temporaryDirectory.appendingPathComponent("Sicherung-" + UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
+        let ditto = Process()
+        ditto.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
+        ditto.arguments = ["-x", "-k", backup.url.path, temp.path]
+        try ditto.run()
+        ditto.waitUntilExit()
+        guard ditto.terminationStatus == 0 else { throw CocoaError(.fileReadCorruptFile) }
+        // Die ZIP-Datei enthält den Ordner „Documents“ (den iCloud-Ordner der App).
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: temp.path)) ?? []
+        let root = names.count == 1 ? temp.appendingPathComponent(names[0], isDirectory: true) : temp
+        guard let docs = iCloudDocuments else { throw CocoaError(.fileNoSuchFile) }
+        var items: [BackupItem] = []
+        if let walker = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil, options: [.skipsPackageDescendants, .skipsHiddenFiles]) {
+            for case let url as URL in walker {
+                let ext = url.pathExtension.lowercased()
+                if ext == "rtfd" { walker.skipDescendants() }
+                guard Self.textTypes.contains(ext) || Self.richTypes.contains(ext) else { continue }
+                let relative = String(Self.plainPath(url).dropFirst(Self.plainPath(root).count + 1))
+                let current = docs.appendingPathComponent(relative)
+                let state: BackupItem.State
+                if !FileManager.default.fileExists(atPath: current.path) {
+                    state = .missing
+                } else {
+                    state = Self.sameContents(url, current) ? .same : .changed
+                }
+                items.append(BackupItem(source: url, relative: relative, state: state))
+            }
+        }
+        items.sort { $0.relative.localizedStandardCompare($1.relative) == .orderedAscending }
+        return (temp, items)
+    }
+
+    /// Gleicher Inhalt? (Bei .rtfd alle Dateien im Paket.)
+    private static func sameContents(_ a: URL, _ b: URL) -> Bool {
+        FileManager.default.contentsEqual(atPath: a.path, andPath: b.path)
+    }
+
+    /// Einträge aus der Sicherung zurückholen. Fehlende werden angelegt; vorhandene nur mit `replace`
+    /// (der jetzige Stand kommt dann in „Frühere Versionen“). Gibt die Zahl der zurückgeholten zurück.
+    func restore(_ items: [BackupItem], replace: Bool) throws -> Int {
+        guard let docs = iCloudDocuments else { throw CocoaError(.fileNoSuchFile) }
+        var count = 0
+        lastOwnWrite = Date()
+        for item in items where item.state != .same {
+            let target = docs.appendingPathComponent(item.relative)
+            if FileManager.default.fileExists(atPath: target.path) {
+                guard replace else { continue }
+                keepVersion(of: target, force: true)
+                let temp = target.deletingLastPathComponent().appendingPathComponent(".wiederherstellen-" + UUID().uuidString + "." + target.pathExtension)
+                try FileManager.default.copyItem(at: item.source, to: temp)
+                _ = try FileManager.default.replaceItemAt(target, withItemAt: temp)
+            } else {
+                try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try FileManager.default.copyItem(at: item.source, to: target)
+            }
+            count += 1
+        }
+        reload()
+        externalRevision += 1
+        return count
+    }
+    #endif
 }
