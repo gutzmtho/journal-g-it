@@ -1,0 +1,144 @@
+# XcodeGen-Konfiguration für JournalIT — eigenes Journal nach dem Vorbild von MacJournal
+# Projekt erzeugen:  xcodegen generate   (nach Änderungen hier oder neuen Dateien)
+#
+# Die App liest und schreibt einfache Dateien (Markdown, RTF, RTFD) in Ordnern.
+# Ordner = Journale, Dateien = Einträge. Keine eigene Datenbank.
+# Mac (App/) und iPhone (iOS/) teilen sich Shared/. Die Daten liegen im iCloud-Ordner der App.
+name: JournalIT
+options:
+  bundleIdPrefix: eu.gutzmannit
+  createIntermediateGroups: true
+  developmentLanguage: de   # deutsche Standardmenüs (Ablage, Bearbeiten, Darstellung …)
+  deploymentTarget:
+    macOS: "15.0"
+    iOS: "18.0"
+
+# Eigene Team-ID von Apple steht in Config/Local.xcconfig (nicht im Git; Vorlage: Config/Local.xcconfig.example).
+configFiles:
+  Debug: Config/Local.xcconfig
+  Release: Config/Local.xcconfig
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.2"
+    CURRENT_PROJECT_VERSION: 29
+    CODE_SIGN_STYLE: Automatic
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon   # Quelle: Tools/make-icons.swift, Tools/make-ios-icon.swift
+
+# iCloud-Ordner der App: in Finder/Dateien als „Journal g-IT“ sichtbar.
+x-ubiquity: &ubiquity
+  NSUbiquitousContainers:
+    iCloud.eu.gutzmannit.journalit:
+      NSUbiquitousContainerIsDocumentScopePublic: true
+      NSUbiquitousContainerName: "Journal g-IT"
+      NSUbiquitousContainerSupportedFolderLevels: Any
+
+x-icloud-entitlements: &icloud
+  # Gemeinsame Schlüsselbund-Gruppe: Schlüssel der verschlüsselten Journale (iCloud-Schlüsselbund, Mac und iPhone).
+  keychain-access-groups:
+    - $(AppIdentifierPrefix)eu.gutzmannit.journalit.shared
+  com.apple.developer.icloud-container-identifiers:
+    - iCloud.eu.gutzmannit.journalit
+  com.apple.developer.icloud-services:
+    - CloudDocuments
+  com.apple.developer.ubiquity-container-identifiers:
+    - iCloud.eu.gutzmannit.journalit
+
+targets:
+  JournalIT:
+    type: application
+    platform: macOS
+    sources:
+      - App
+      - Shared
+    entitlements:
+      path: Config/JournalIT.entitlements
+      properties:
+        <<: *icloud
+        # Sandbox (Pflicht für TestFlight/App Store). Fremde Ordner gibt der Nutzer einmal frei.
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-write: true
+        com.apple.security.files.bookmarks.app-scope: true
+        # Drucken (ohne diese Freigabe meldet macOS „Diese App unterstützt Drucken nicht“).
+        com.apple.security.print: true
+        # Karte und Ortssuche (Apple-Server), aktueller Ort für Einträge.
+        com.apple.security.network.client: true
+        com.apple.security.personal-information.location: true
+        # Termine und Erinnerungen aus Einträgen, Einträge aus Terminen.
+        com.apple.security.personal-information.calendars: true
+        # Tonaufnahmen in Einträgen.
+        com.apple.security.device.audio-input: true
+    info:
+      path: Config/Info.plist
+      properties:
+        CFBundleDisplayName: "Journal g-IT"
+        # Schlüsselbund-Gruppe für die Verschlüsselung (Team-ID kommt beim Bauen dazu).
+        JournalKeychainGroup: "$(AppIdentifierPrefix)eu.gutzmannit.journalit.shared"
+        CFBundleName: "Journal g-IT"
+        CFBundleDevelopmentRegion: de
+        CFBundleLocalizations: [de]
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSApplicationCategoryType: public.app-category.productivity
+        NSLocationUsageDescription: "Der Ort wird nur gespeichert, wenn du im Eintrag „Aktueller Ort“ wählst."
+        NSCalendarsFullAccessUsageDescription: "Termine aus Einträgen anlegen und Einträge aus Terminen übernehmen."
+        NSRemindersFullAccessUsageDescription: "Erinnerungen aus Einträgen anlegen."
+        NSMicrophoneUsageDescription: "Tonaufnahmen für Einträge."
+        NSLocationWhenInUseUsageDescription: "Der Ort wird nur gespeichert, wenn du im Eintrag „Aktueller Ort“ wählst."
+        ITSAppUsesNonExemptEncryption: false
+        <<: *ubiquity
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: eu.gutzmannit.journalit
+        PRODUCT_NAME: "Journal g-IT"
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_USER_SELECTED_FILES: readwrite
+        ENABLE_HARDENED_RUNTIME: YES
+    scheme: {}
+
+  JournalIT.iOS:
+    type: application
+    platform: iOS
+    sources:
+      - iOS
+      - Shared
+    entitlements:
+      path: Config/JournalIT-iOS.entitlements
+      properties: *icloud
+    info:
+      path: Config/iOS-Info.plist
+      properties:
+        CFBundleDisplayName: "Journal g-IT"
+        # Schlüsselbund-Gruppe für die Verschlüsselung (Team-ID kommt beim Bauen dazu).
+        JournalKeychainGroup: "$(AppIdentifierPrefix)eu.gutzmannit.journalit.shared"
+        CFBundleName: "Journal g-IT"
+        CFBundleDevelopmentRegion: de
+        CFBundleLocalizations: [de]
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        # Vorlesen läuft weiter, wenn der Bildschirm ausgeht.
+        UIBackgroundModes: [audio]
+        NSFaceIDUsageDescription: "Face ID öffnet gesperrte Journale."
+        NSLocationWhenInUseUsageDescription: "Der Ort wird nur gespeichert, wenn du im Eintrag „Aktueller Ort“ wählst."
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        "UISupportedInterfaceOrientations~ipad":
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        <<: *ubiquity
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: eu.gutzmannit.journalit.ios
+        PRODUCT_NAME: JournalIT
+        PRODUCT_MODULE_NAME: JournalIT_iOS
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+    scheme: {}

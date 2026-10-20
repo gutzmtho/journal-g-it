@@ -1,0 +1,14 @@
+# Erzeugt (xcodegen generate)
+JournalIT.xcodeproj/
+build/
+DerivedData/
+xcuserdata/
+*.xcarchive
+
+# Privat
+Config/Local.xcconfig
+NOTIZEN-privat.md
+MacJournal-Funktionen.md
+
+.DS_Store
+__pycache__/
