@@ -1,69 +1,71 @@
 # Journal g-IT
 
-Ein Tagebuch- und Notizprogramm für **Mac und iPhone/iPad**, nach dem Vorbild von MacJournal (wird nicht mehr gepflegt).
-Geschrieben in SwiftUI, macOS 15+ und iOS 18+.
+[Deutsch](README.de.md) · **English**
 
-Die Einträge sind **gewöhnliche Dateien** in Ordnern: Markdown (`.md`, `.txt`) und Rich Text (`.rtf`, `.rtfd` mit Bildern).
-Ordner = Journale, Dateien = Einträge. Es gibt keine eigene Datenbank. Darum lassen sich die Einträge auch mit anderen
-Programmen (Finder, TextEdit, Obsidian, Skripte, KI-Assistenten) lesen und schreiben. Mac und iPhone teilen sie über
-den iCloud-Ordner der App.
+A journal and notes app for **Mac and iPhone/iPad**, modelled on MacJournal (which is no longer maintained).
+Written in SwiftUI, macOS 15+ and iOS 18+. The app itself is in German.
 
-> Kein Produkt von Dan Schimpf Software und nicht mit MacJournal verbunden. Kein Code von MacJournal übernommen.
+Entries are **plain files** in folders: Markdown (`.md`, `.txt`) and Rich Text (`.rtf`, `.rtfd` with images).
+Folders = journals, files = entries. There is no database of its own, so entries can also be read and written by
+other programs (Finder, TextEdit, Obsidian, scripts, AI assistants). Mac and iPhone share them through the app's
+iCloud folder.
 
-## Funktionen
+> Not a product of Dan Schimpf Software and not affiliated with MacJournal. No MacJournal code was used.
 
-- **Journale und Einträge:** verschachtelte Journale, neu, umbenennen, verschieben, kopieren, duplizieren, Papierkorb.
-- **Schreiben:** Rich Text mit Schrift, Farben, Bildern und Anhängen; Markdown mit schöner Leseansicht. Diktieren.
-  Menü „Text“: Checklisten (☐/☑ bzw. `- [ ]`), Einrücken, Groß/klein, Zeilen sortieren, doppelte Zeilen entfernen,
-  Zeilenumbrüche, Mail-Zitate. Eintrag an der Cursor-Stelle teilen, mehrere Einträge zusammenführen, Gliederung,
-  Tonaufnahme, Bild oder Datei einfügen. Wortzahl, Schreibziel, Schreib-Timer, Fokus-Modus.
-- **Ordnen:** Fahne, Schlagwörter, intelligente Journale (Regeln: Text, Zeitraum, Schlagwörter, Bewertung, Etikett, Status),
-  Merkmale (Bewertung, Farb-Etikett, Stimmung, Status, Priorität, Ort mit Karte), Vorlagen mit Platzhaltern, Schnellnotiz.
-- **Ansichten:** Liste, Monatskalender, Zeitleiste, Karte; Statistik; Fenster und Tabs. Suche in allen Journalen mit Markierung
-  der Fundstellen. Links zwischen Einträgen und „Wer verlinkt hierher?“.
-- **Vorlesen:** absatzweise, mit einstellbaren Pausen und aufbereiteter Aussprache (Abkürzungen, Daten, Uhrzeiten).
-- **Austausch:** Drucken und PDF, Export als Text oder HTML, „Als HTML kopieren“, Import von Dateien (Markdown, Text, RTF,
-  Word, HTML, OpenDocument) und von Kalender-Terminen, Termin oder Erinnerung aus einem Eintrag.
-- **Sicherheit:** Journale sperren; Journale oder einzelne Einträge **verschlüsseln** (siehe unten); frühere Versionen
-  jedes Eintrags; tägliche Sicherung aller Journale als ZIP.
-- **Mitnehmen:** Werkzeuge in `Tools/`, um eine MacJournal-Bibliothek in Ordner mit RTF/RTFD-Dateien zu übertragen
-  (Titel, Datum, Bilder, Links zwischen Einträgen bleiben).
+## Features
 
-## Wo was gespeichert wird
+- **Journals and entries:** nested journals; new, rename, move, copy, duplicate, trash.
+- **Writing:** Rich Text with fonts, colours, images and attachments; Markdown with a clean reading view. Dictation.
+  "Text" menu: checklists (☐/☑ or `- [ ]`), indent, upper/lower case, sort lines, remove duplicate lines, join lines,
+  remove mail quotes. Split an entry at the cursor, merge several entries, outlines, audio recording, insert image or file.
+  Word count, writing goal, writing timer, focus mode.
+- **Organising:** flags, tags, smart journals (rules: text, period, tags, rating, label, status), attributes (rating,
+  colour label, mood, status, priority, location with map), templates with placeholders, quick note.
+- **Views:** list, month calendar, timeline, map; statistics; windows and tabs. Search across all journals with highlighted
+  matches. Links between entries and "Who links here?".
+- **Read aloud:** paragraph by paragraph, with adjustable pauses and prepared pronunciation (abbreviations, dates, times).
+- **Exchange:** print and PDF, export as text or HTML, "Copy as HTML", import files (Markdown, text, RTF, Word, HTML,
+  OpenDocument) and calendar events, create an event or reminder from an entry.
+- **Security:** lock journals; **encrypt** journals or single entries (see below); earlier versions of every entry;
+  daily backup of all journals as ZIP.
+- **Migration:** tools in `Tools/` to move a MacJournal library into folders of RTF/RTFD files (titles, dates, images and
+  links between entries are kept).
 
-| Was | Wo |
+## Where things are stored
+
+| What | Where |
 |---|---|
-| Einträge | `.md`/`.txt`/`.rtf`/`.rtfd` im iCloud-Ordner der App (oder in freigegebenen Ordnern) |
-| Datum, Fahne, Schlagwörter, Merkmale (Markdown) | Kopf der Datei: `datum:`, `markiert: ja`, `tags: [A, B]`, `bewertung: 4`, `ort: …`, `geo: 53.87, 10.69` |
-| Titel, Schlagwörter, Merkmale (Rich Text) | RTF-Kopf: `{\info{\title …}{\keywords …}}` |
-| Intelligente Journale, gesperrte/verschlüsselte Journale | JSON-Dateien im iCloud-Ordner der App |
-| Frühere Versionen, Sicherungen | nur auf dem Gerät (Programm-Support der App) |
+| Entries | `.md`/`.txt`/`.rtf`/`.rtfd` in the app's iCloud folder (or in folders you grant access to) |
+| Date, flag, tags, attributes (Markdown) | file header: `datum:`, `markiert: ja`, `tags: [A, B]`, `bewertung: 4`, `ort: …`, `geo: 53.87, 10.69` |
+| Title, tags, attributes (Rich Text) | RTF info: `{\info{\title …}{\keywords …}}` |
+| Smart journals, locked/encrypted journals | JSON files in the app's iCloud folder |
+| Earlier versions, backups | on the device only (the app's Application Support) |
 
-## Verschlüsselung
+## Encryption
 
-- Jede Datei wird mit **AES-256-GCM** (CryptoKit) verschlüsselt: `JGITENC1` + Nonce + Text + Prüfsumme.
-  Name und Endung bleiben; bei `.rtfd` ist jede Datei im Paket verschlüsselt.
-- Ein zufälliger Schlüssel; er liegt, mit dem Passwort verschlossen (PBKDF2-SHA256, 600.000 Runden), in
-  `Verschlüsselung.json` im iCloud-Ordner. Zum Öffnen das Passwort (Vorgabe) oder wahlweise Touch ID / Face ID
-  (dann liegt der Schlüssel im iCloud-Schlüsselbund; zum Ersatz gibt es einen Wiederherstellungsschlüssel).
-- Der Inhalt verschlüsselter Einträge kommt nie in den Zwischenspeicher. Ohne Passwort ist er verloren.
+- Each file is encrypted with **AES-256-GCM** (CryptoKit): `JGITENC1` + nonce + ciphertext + tag.
+  Name and extension stay; in an `.rtfd` package every file is encrypted.
+- One random key, sealed with the password (PBKDF2-SHA256, 600,000 rounds) in `Verschlüsselung.json` in the iCloud folder.
+  Unlock with the password (default) or optionally Touch ID / Face ID (the key then lives in the iCloud Keychain;
+  a recovery key is shown once as a fallback).
+- Content of encrypted entries never goes into the cache. Without the password it is lost.
 - Code: `Shared/Vault.swift`, `Shared/JournalLock.swift`.
 
-## Bauen
+## Building
 
-Voraussetzung: Xcode 27 und [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+Requires Xcode 27 and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```bash
 xcodegen generate
 open JournalIT.xcodeproj
 ```
 
-Vor dem ersten Bauen: `Config/Local.xcconfig.example` nach `Config/Local.xcconfig` kopieren und die eigene Team-ID von Apple
-eintragen. In `project.yml` die Bundle-IDs (`eu.gutzmannit.journalit…`), den iCloud-Container (`iCloud.eu.gutzmannit.journalit`)
-und die Schlüsselbund-Gruppe anpassen.
+Before the first build: copy `Config/Local.xcconfig.example` to `Config/Local.xcconfig` and enter your own Apple team ID.
+In `project.yml`, change the bundle IDs (`eu.gutzmannit.journalit…`), the iCloud container (`iCloud.eu.gutzmannit.journalit`)
+and the keychain group.
 
-Aufbau: `Shared/` (Daten, Ansichten für beide), `App/` (Mac), `iOS/` (iPhone/iPad), `Tools/` (Hilfsskripte, Symbole).
+Layout: `Shared/` (data and views for both), `App/` (Mac), `iOS/` (iPhone/iPad), `Tools/` (helper scripts, icons).
 
-## Lizenz
+## Licence
 
-MIT, siehe [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
