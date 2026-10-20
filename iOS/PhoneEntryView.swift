@@ -50,7 +50,7 @@ struct PhoneEntryView: View {
         }
         .safeAreaInset(edge: .bottom) {
             // Beim Diktieren: erkannter Text und Stopp.
-            if dictation.target == url { DictationBar() }
+            if dictation.target == AnyHashable(url) { DictationBar() }
             // Beim Vorlesen: Absatz zurück, Pause/Weiter, Absatz vor, Stopp.
             if speaker.speaking == url {
                 HStack { SpeechControls(url: url, library: library) }
@@ -89,9 +89,9 @@ struct PhoneEntryView: View {
                     dictationBase = markdown
                     dictation.toggle(for: url)
                 } label: {
-                    Label("Diktieren", systemImage: dictation.target == url ? "mic.fill" : "mic")
+                    Label("Diktieren", systemImage: dictation.target == AnyHashable(url) ? "mic.fill" : "mic")
                 }
-                .tint(dictation.target == url ? .red : nil)
+                .tint(dictation.target == AnyHashable(url) ? .red : nil)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button(editing ? "Fertig" : "Bearbeiten") {
@@ -163,7 +163,7 @@ struct PhoneEntryView: View {
         }
         .onChange(of: markdown) { _, _ in scheduleMarkdownSave() }
         .onChange(of: dictation.transcript) { _, text in
-            guard dictation.target == url else { return }
+            guard dictation.target == AnyHashable(url) else { return }
             if isRich {
                 NotificationCenter.default.post(name: .phoneDictationText, object: url, userInfo: ["text": text])
             } else {
@@ -172,7 +172,7 @@ struct PhoneEntryView: View {
             }
         }
         .onChange(of: dictation.target) { old, new in
-            guard old == url, new != url else { return }
+            guard old == AnyHashable(url), new != AnyHashable(url) else { return }
             if isRich {
                 NotificationCenter.default.post(name: .phoneDictationText, object: url, userInfo: ["done": true])
             } else {
@@ -186,7 +186,7 @@ struct PhoneEntryView: View {
             if !isRich && markdown == savedMarkdown { loadMarkdown() }
         }
         .onDisappear {
-            if dictation.target == url { dictation.stop() }
+            if dictation.target == AnyHashable(url) { dictation.stop() }
             saveMarkdownNow()
             if speaker.speaking == url { speaker.stop() }
         }

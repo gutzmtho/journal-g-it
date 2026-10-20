@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Combine
 
 /// Befehle an den gerade offenen Text-Editor (aus der Menüleiste oder der Werkzeugleiste).
 enum EditorCommand: String, CaseIterable {
@@ -21,8 +22,8 @@ enum EditorCommand: String, CaseIterable {
         textView.window?.makeFirstResponder(textView)
         switch self {
         case .dictate:
-            // Wie Bearbeiten › „Diktat starten“ von macOS.
-            NSApp.sendAction(Selector(("startDictation:")), to: nil, from: textView)
+            // Eigene Spracherkennung (geht auch, wenn das Diktat von macOS aus ist).
+            MacDictation.toggle(textView)
         case .split:
             break  // macht der Editor selbst (braucht die Datei)
         case .find, .replace, .findNext, .findPrevious:
@@ -70,13 +71,56 @@ enum EditorCommand: String, CaseIterable {
     }
 }
 
-/// Knopf in der Werkzeugleiste: Diktieren starten (Text kommt an die Cursor-Stelle).
+/// Knopf in der Werkzeugleiste: Diktieren starten und beenden (Text kommt an die Cursor-Stelle).
 struct DictateButton: View {
+    @ObservedObject private var dictation = PhoneDictation.shared
+
     var body: some View {
-        Button { EditorCommand.dictate.post() } label: {
-            Label("Diktieren", systemImage: "mic")
+        Button {
+            if dictation.active { dictation.stop() } else { EditorCommand.dictate.post() }
+        } label: {
+            Label(dictation.active ? "Diktat beenden" : "Diktieren", systemImage: dictation.active ? "mic.fill" : "mic")
         }
-        .help("Diktieren: sprechen statt tippen. Der Text kommt an die Cursor-Stelle. Beenden mit „Fertig“ oder der fn-Taste.")
+        .foregroundStyle(dictation.active ? Color.red : Color.primary)
+        .help(dictation.active ? "Diktat beenden" : "Diktieren: sprechen statt tippen. Der Text kommt an die Cursor-Stelle. Noch einmal klicken zum Beenden.")
+        .alert("Diktieren", isPresented: Binding(get: { dictation.problem != nil }, set: { if !$0 { dictation.problem = nil } })) {
+            Button("OK") { dictation.problem = nil }
+        } message: { Text(dictation.problem ?? "") }
+    }
+}
+
+/// Diktat am Mac: das Gesagte laufend an der Cursor-Stelle der Text-Ansicht einsetzen (mit Rückgängig).
+enum MacDictation {
+    private static weak var textView: NSTextView?
+    private static var range: NSRange?
+    private static var watch: AnyCancellable?
+
+    static func toggle(_ view: NSTextView) {
+        let dictation = PhoneDictation.shared
+        if dictation.target == AnyHashable(ObjectIdentifier(view)) { dictation.stop(); return }
+        textView = view
+        range = nil
+        watch = dictation.$transcript.dropFirst().receive(on: DispatchQueue.main).sink { insert($0) }
+        dictation.start(for: AnyHashable(ObjectIdentifier(view)))
+    }
+
+    private static func insert(_ text: String) {
+        // Eintrag inzwischen geschlossen: nicht weiter zuhören.
+        guard let view = textView, view.window != nil else { PhoneDictation.shared.stop(); return }
+        guard let storage = view.textStorage, !text.isEmpty,
+              PhoneDictation.shared.target == AnyHashable(ObjectIdentifier(view)) else { return }
+        if range == nil { range = view.selectedRange() }
+        guard var current = range, NSMaxRange(current) <= storage.length else { range = nil; return }
+        let before = current.location > 0 ? (storage.string as NSString).substring(with: NSRange(location: current.location - 1, length: 1)) : "\n"
+        let gap = [" ", "\n", "\t"].contains(before) ? "" : " "
+        let inserted = NSAttributedString(string: gap + text, attributes: view.typingAttributes)
+        guard view.shouldChangeText(in: current, replacementString: inserted.string) else { return }
+        storage.replaceCharacters(in: current, with: inserted)
+        view.didChangeText()
+        current.length = inserted.length
+        range = current
+        view.setSelectedRange(NSRange(location: NSMaxRange(current), length: 0))
+        view.scrollRangeToVisible(view.selectedRange())
     }
 }
 

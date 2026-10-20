@@ -18,7 +18,7 @@ den iCloud-Ordner der App.
 - **Schreiben:** Rich Text mit Schrift, Farben, Bildern und Anhängen; Markdown mit schöner Leseansicht. Diktieren.
   Menü „Text“: Checklisten (☐/☑ bzw. `- [ ]`), Einrücken, Groß/klein, Zeilen sortieren, doppelte Zeilen entfernen,
   Zeilenumbrüche, Mail-Zitate. Eintrag an der Cursor-Stelle teilen, mehrere Einträge zusammenführen, Gliederung,
-  Tonaufnahme, Bild oder Datei einfügen. Diktier-Knopf auch am iPhone. Wortzahl, Schreibziel, Schreib-Timer, Fokus-Modus.
+  Tonaufnahme, Bild oder Datei einfügen. Eigenes Diktieren (Spracherkennung von Apple, wenn möglich auf dem Gerät) am Mac und am iPhone. Wortzahl, Schreibziel, Schreib-Timer, Fokus-Modus.
 - **Ordnen:** Fahne, Schlagwörter, intelligente Journale (Regeln: Text, Zeitraum, Schlagwörter, Bewertung, Etikett, Status),
   Merkmale (Bewertung, Farb-Etikett, Stimmung, Status, Priorität, Ort mit Karte), Vorlagen mit Platzhaltern, Schnellnotiz.
 - **Ansichten:** Liste, Monatskalender, Zeitleiste, Karte; Statistik; Fenster und Tabs. Suche in allen Journalen mit Markierung

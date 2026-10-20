@@ -18,7 +18,7 @@ iCloud folder.
 - **Writing:** Rich Text with fonts, colours, images and attachments; Markdown with a clean reading view. Dictation.
   "Text" menu: checklists (☐/☑ or `- [ ]`), indent, upper/lower case, sort lines, remove duplicate lines, join lines,
   remove mail quotes. Split an entry at the cursor, merge several entries, outlines, audio recording, insert image or file.
-  Dictation button on iPhone too. Word count, writing goal, writing timer, focus mode.
+  Own dictation (Apple speech recognition, on device where possible) on Mac and iPhone. Word count, writing goal, writing timer, focus mode.
 - **Organising:** flags, tags, smart journals (rules: text, period, tags, rating, label, status), attributes (rating,
   colour label, mood, status, priority, location with map), templates with placeholders, quick note.
 - **Views:** list, month calendar, timeline, map; statistics; windows and tabs. Search across all journals with highlighted

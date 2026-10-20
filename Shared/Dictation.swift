@@ -2,14 +2,14 @@ import SwiftUI
 import Speech
 import AVFoundation
 
-/// Diktieren am iPhone mit eigenem Knopf (wie am Mac): Apples Spracherkennung, wenn möglich auf dem Gerät.
-/// `transcript` wächst beim Sprechen; der Eintrag fügt ihn laufend ein. Hält die Erkennung von selbst an
-/// (Pause, Zeitlimit), geht es nahtlos weiter, bis man „Stopp“ tippt.
+/// Diktieren mit eigenem Knopf, am Mac und am iPhone: Apples Spracherkennung, wenn möglich auf dem Gerät.
+/// Geht ohne das Diktat von macOS/iOS. `transcript` wächst beim Sprechen; der Editor fügt ihn laufend ein.
+/// Hält die Erkennung von selbst an (Pause, Zeitlimit), geht es nahtlos weiter, bis man „Stopp“ wählt.
 final class PhoneDictation: ObservableObject {
     static let shared = PhoneDictation()
 
-    /// Für welchen Eintrag gerade diktiert wird; nil = aus.
-    @Published private(set) var target: URL?
+    /// Wofür gerade diktiert wird (iPhone: der Eintrag, Mac: die Text-Ansicht); nil = aus.
+    @Published private(set) var target: AnyHashable?
     /// Alles, was seit dem Start gesagt wurde.
     @Published private(set) var transcript = ""
     @Published var problem: String?
@@ -23,18 +23,18 @@ final class PhoneDictation: ObservableObject {
 
     var active: Bool { target != nil }
 
-    func toggle(for url: URL) {
+    func toggle(for url: AnyHashable) {
         if target == url { stop() } else { start(for: url) }
     }
 
-    func start(for url: URL) {
+    func start(for url: AnyHashable) {
         stop()
         problem = nil
         SFSpeechRecognizer.requestAuthorization { status in
             AVAudioApplication.requestRecordPermission { granted in
                 DispatchQueue.main.async {
                     guard status == .authorized, granted else {
-                        self.problem = "Diktieren braucht Mikrofon und Spracherkennung. Bitte in Einstellungen › Journal g-IT erlauben."
+                        self.problem = "Diktieren braucht Mikrofon und Spracherkennung. Bitte in den Einstellungen (Datenschutz) für Journal g-IT erlauben."
                         return
                     }
                     guard self.recognizer?.isAvailable == true else {
@@ -59,14 +59,18 @@ final class PhoneDictation: ObservableObject {
         task = nil
         request = nil
         target = nil
+        #if os(iOS)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        #endif
     }
 
     private func begin() {
         do {
+            #if os(iOS)
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.record, mode: .measurement, options: .duckOthers)
             try session.setActive(true, options: .notifyOthersOnDeactivation)
+            #endif
             let input = engine.inputNode
             input.removeTap(onBus: 0)
             input.installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0)) { [weak self] buffer, _ in

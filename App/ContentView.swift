@@ -205,6 +205,13 @@ struct ContentView: View {
                     }
                     .help("Eintrag in den Papierkorb legen")
                 }
+                ToolbarItem {
+                    Button { selected = [] } label: {
+                        Label("Schließen", systemImage: "xmark.circle")
+                    }
+                    .keyboardShortcut(.escape, modifiers: [.command])
+                    .help("Eintrag schließen (⌘⎋)")
+                }
             }
         }
     }

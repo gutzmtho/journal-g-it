@@ -37,9 +37,11 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Der Ort wird nur gespeichert, wenn du im Eintrag „Aktueller Ort“ wählst.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Tonaufnahmen für Einträge.</string>
+	<string>Tonaufnahmen und Diktieren in Einträgen.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>Erinnerungen aus Einträgen anlegen.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Diktieren: Gesprochenes wird zu Text, wenn möglich direkt auf dem Mac.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
 		<key>iCloud.eu.gutzmannit.journalit</key>
